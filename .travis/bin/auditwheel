@@ -1,0 +1,16 @@
+#!/bin/bash -x
+
+if [ $# -eq 1 ]; then
+  auditwheel
+  exit 0
+fi
+
+if [ "$1" = repair ]; then
+  wheel_file=$2
+  # $3 == -w
+  wheel_dir=$4
+  cp $wheel_file $wheel_dir/$(basename ${wheel_file//-linux_/-manylinux1_})
+  exit 0
+fi
+
+auditwheel $*

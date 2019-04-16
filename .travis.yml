@@ -1,0 +1,44 @@
+sudo: false
+
+dist: trusty
+
+language: python
+
+python:
+  - 3.6
+
+cache:
+  - pip
+
+notifications:
+  email: false
+
+branches:
+  only:
+    - master
+
+env:
+  global:
+    - CIBW_MANYLINUX1_X86_64_IMAGE='quay.io/skvark/manylinux1_x86_64'
+    - CIBW_MANYLINUX1_I686_IMAGE='quay.io/skvark/manylinux1_i686'
+    - CIBW_ENVIRONMENT='MAKEFLAGS=-j PATH=/project/.travis/bin:$PATH'
+
+matrix:
+  include:
+    - env: CIBW_BUILD='cp37-*'
+    - env: CIBW_BUILD='cp36-*'
+    - env: CIBW_BUILD='cp35-*'
+    - env: CIBW_BUILD='cp34-*'
+    - env: CIBW_BUILD='cp27-*'
+
+script:
+  - git clone --recursive https://github.com/wkentaro/octomap-python.git
+  - cd octomap-python
+
+  - cp -r ../.travis .
+
+  - pip install -U cibuildwheel
+  - cibuildwheel --output-dir dist
+
+  - pip install -U twine
+  - twine upload -u ${PYPI_USERNAME} -p ${PYPI_PASSWORD} --skip-existing dist/octomap_python-*.whl
